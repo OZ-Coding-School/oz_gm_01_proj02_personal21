@@ -1,18 +1,69 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class CardData : MonoBehaviour
+namespace ClueGame.Data
 {
-    // Start is called before the first frame update
-    void Start()
+    // 카드 타입
+    public enum CardType
     {
-        
+        Character,
+        Weapon,
+        Room
     }
 
-    // Update is called once per frame
-    void Update()
+    // 캐릭터 카드 (6종)
+    public enum CharacterCard
     {
-        
+        MissScarlet,
+        ColonelMustard,
+        MrsWhite,
+        MrGreen,
+        MrsPeacock,
+        ProfessorPlum
+    }
+
+    // 무기 카드 (6종)
+    public enum WeaponCard
+    {
+        촛대,
+        칼,
+        납파이프,
+        권총,
+        밧줄,
+        렌치
+    }
+
+    // 방 카드 (9종)
+    public enum RoomCard
+    {
+        부엌,
+        무도회장,
+        온실,
+        식당,
+        당구장,
+        도서관,
+        라운지,
+        홀,
+        서재
+    }
+
+    // 카드 클래스
+    [System.Serializable]
+    public class Card
+    {
+        public CardType cardType;
+        public string cardName;
+        public int cardId;
+
+        public Card(CardType type, string name, int id)
+        {
+            cardType = type;
+            cardName = name;
+            cardId = id;
+        }
+
+        public override string ToString()
+        {
+            return $"{cardType}: {cardName}";
+        }
     }
 }
