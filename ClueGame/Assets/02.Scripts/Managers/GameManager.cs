@@ -54,12 +54,12 @@ namespace ClueGame.Managers
 
             var availableCharacters = new List<CharacterCard>
             {
-                CharacterCard.MissScarlet,
-                CharacterCard.ColonelMustard,
-                CharacterCard.MrsWhite,
-                CharacterCard.MrGreen,
-                CharacterCard.MrsPeacock,
-                CharacterCard.ProfessorPlum
+             CharacterCard.MissScarlet,
+             CharacterCard.ColonelMustard,
+             CharacterCard.MrsWhite,
+             CharacterCard.MrGreen,
+             CharacterCard.MrsPeacock,
+             CharacterCard.ProfessorPlum
             };
 
             for (int i = 0; i < numberOfPlayers; i++)
@@ -68,7 +68,12 @@ namespace ClueGame.Managers
                 string playerName = i == 0 ? "Player" : $"AI {i}";
                 bool isAI = i > 0;
 
-                players.Add(new PlayerData(playerName, character, isAI));
+                PlayerData player = new PlayerData(playerName, character, isAI);
+
+                // 시작 위치 설정
+                player.currentPosition = BoardManager.Instance.GetStartPosition(i);
+
+                players.Add(player);
             }
 
             Debug.Log($"{numberOfPlayers}명의 플레이어가 생성되었습니다.");

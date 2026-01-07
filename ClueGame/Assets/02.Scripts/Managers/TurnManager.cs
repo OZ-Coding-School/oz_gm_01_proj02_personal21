@@ -89,6 +89,10 @@ namespace ClueGame.Managers
             int diceResult = DiceManager.Instance.RollDice();
             remainingMoves = diceResult;
 
+            // 이동 가능한 위치 계산
+            PlayerData currentPlayer = GetCurrentPlayer();
+            MovementManager.Instance.CalculateAvailableMoves(currentPlayer.currentPosition, diceResult);
+
             ChangePhase(GamePhase.Moving);
         }
 
