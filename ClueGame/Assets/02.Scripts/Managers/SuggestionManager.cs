@@ -32,7 +32,6 @@ namespace ClueGame.Managers
             Debug.Log($"=== {currentPlayer.playerName}의 제안 ===");
             Debug.Log($"{character.cardName} + {weapon.cardName} + {room.cardName}");
 
-            // 현재 플레이어의 다음 플레이어부터 순서대로 확인
             List<PlayerData> players = GameManager.Instance.GetPlayers();
             int currentIndex = players.IndexOf(currentPlayer);
 
@@ -43,12 +42,18 @@ namespace ClueGame.Managers
 
                 if (player.isEliminated) continue;
 
-                // 해당 플레이어가 제안된 카드 중 하나라도 가지고 있는지 확인
                 Card matchingCard = player.GetMatchingCard(character, weapon, room);
 
                 if (matchingCard != null)
                 {
                     Debug.Log($"→ {player.playerName}이(가) [{matchingCard.cardName}] 카드를 공개했습니다.");
+
+                    // 추리 노트에 자동 체크 (추가)
+                    if (DetectiveNoteData.Instance != null)
+                    {
+                        DetectiveNoteData.Instance.SetCardStatus(matchingCard.cardId, CardStatus.Shown);
+                    }
+
                     OnCardRevealed?.Invoke(player, matchingCard);
                     return matchingCard;
                 }
@@ -58,7 +63,6 @@ namespace ClueGame.Managers
             OnNoCardRevealed?.Invoke();
             return null;
         }
-
         // AI가 제안할 카드 선택 (랜덤)
         public (Card character, Card weapon, Card room) GetRandomSuggestion(RoomCard currentRoom)
         {
