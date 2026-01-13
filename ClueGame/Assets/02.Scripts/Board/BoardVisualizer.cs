@@ -1,12 +1,15 @@
-using UnityEngine;
-using ClueGame.Managers;
-using ClueGame.Data;
 using ClueGame.Board;
+using ClueGame.Data;
+using ClueGame.Managers;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace ClueGame.Board
 {
     public class BoardVisualizer : MonoBehaviour
     {
+        public static BoardVisualizer Instance { get; private set; }
+
         [Header("Settings")]
         [SerializeField] private float tileSize = 1f;
         [SerializeField] private GameObject tilePrefab;
@@ -17,7 +20,23 @@ namespace ClueGame.Board
         [SerializeField] private Color roomColor = new Color(0.7f, 0.8f, 1f);
         [SerializeField] private Color startPointColor = new Color(1f, 0.7f, 0.7f);
 
+        [Header("Room Labels")]
+        [SerializeField] private GameObject roomLabelPrefab;
+        private List<RoomLabel> roomLabels = new List<RoomLabel>();
+
         private GameObject[,] tileObjects;
+
+        private void Awake()
+        {
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
+        }
 
         private void Start()
         {
@@ -37,6 +56,9 @@ namespace ClueGame.Board
                 }
             }
 
+            // 방 라벨 추가
+            CreateRoomLabels();
+
             Debug.Log("보드 비주얼 생성 완료");
         }
 
@@ -47,7 +69,6 @@ namespace ClueGame.Board
 
             if (tile == null) return;
 
-            // 타일 생성
             GameObject tileObj;
 
             if (tilePrefab != null)
@@ -60,24 +81,17 @@ namespace ClueGame.Board
                 tileObj.transform.SetParent(boardContainer);
             }
 
-            // 위치 설정
             tileObj.transform.position = new Vector3(x * tileSize, y * tileSize, 0);
-            tileObj.transform.localScale = new Vector3(tileSize * 0.9f, tileSize * 0.9f, 1f);
+            tileObj.transform.localScale = new Vector3(tileSize * 0.95f, tileSize * 0.95f, 1f);
             tileObj.name = $"Tile_{x}_{y}";
 
-            // 색상 설정
             Renderer renderer = tileObj.GetComponent<Renderer>();
             if (renderer != null)
             {
-                Color color = tile.tileType switch
-                {
-                    TileType.Hallway => hallwayColor,
-                    TileType.Room => GetRoomColor(tile.roomType),
-                    TileType.StartPoint => startPointColor,
-                    _ => hallwayColor
-                };
-
-                renderer.material.color = color;
+                // 새로운 Material 생성 (Transparent)
+                Material mat = new Material(Shader.Find("Sprites/Default"));
+                mat.color = new Color(1f, 1f, 1f, 0f); // 완전 투명
+                renderer.material = mat;
             }
 
             tileObjects[x, y] = tileObj;
@@ -117,6 +131,26 @@ namespace ClueGame.Board
                         renderer.material.color = color;
                     }
                 }
+            }
+        }
+
+        private void CreateRoomLabels()
+        {
+            // 각 방의 중심 위치에 라벨 생성
+            var rooms = System.Enum.GetValues(typeof(RoomCard));
+
+            foreach (RoomCard room in rooms)
+            {
+                Vector2Int center = BoardManager.Instance.GetRoomCenter(room);
+                Vector3 worldPos = new Vector3(center.x * tileSize, center.y * tileSize, -2);
+
+                GameObject labelObj = new GameObject($"Label_{room}");
+                labelObj.transform.SetParent(boardContainer);
+
+                RoomLabel label = labelObj.AddComponent<RoomLabel>();
+                label.Initialize(room, worldPos);
+
+                roomLabels.Add(label);
             }
         }
     }

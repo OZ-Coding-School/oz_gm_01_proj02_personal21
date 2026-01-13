@@ -30,12 +30,12 @@ namespace ClueGame.Managers
 
         private List<Vector2Int> startPositions = new List<Vector2Int>
         {
-            new Vector2Int(7, 0),
-            new Vector2Int(0, 9),
-            new Vector2Int(0, 14),
-            new Vector2Int(9, 23),
-            new Vector2Int(14, 23),
-            new Vector2Int(23, 6)
+            new Vector2Int(12, 12),  // Áß¾Ó
+            new Vector2Int(12, 12),  // Áß¾Ó
+            new Vector2Int(12, 12),  // Áß¾Ó
+            new Vector2Int(12, 12),  // Áß¾Ó
+            new Vector2Int(12, 12),  // Áß¾Ó
+            new Vector2Int(12, 12)   // Áß¾Ó
         };
 
         private void Awake()

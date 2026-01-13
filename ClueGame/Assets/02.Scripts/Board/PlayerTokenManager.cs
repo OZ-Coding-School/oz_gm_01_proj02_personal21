@@ -71,7 +71,7 @@ namespace ClueGame.Managers
                 // Prefab이 없으면 기본 원형 생성
                 tokenObj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 tokenObj.transform.SetParent(tokenContainer);
-                tokenObj.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+                tokenObj.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f); // 0.5 → 0.8
 
                 // SpriteRenderer 추가 (2D용)
                 Destroy(tokenObj.GetComponent<MeshRenderer>());

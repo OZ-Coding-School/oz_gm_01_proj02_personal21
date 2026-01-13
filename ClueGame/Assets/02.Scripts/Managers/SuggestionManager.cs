@@ -1,7 +1,8 @@
-using UnityEngine;
 using ClueGame.Data;
 using ClueGame.Player;
+using ClueGame.UI;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace ClueGame.Managers
 {
@@ -48,7 +49,12 @@ namespace ClueGame.Managers
                 {
                     Debug.Log($"→ {player.playerName}이(가) [{matchingCard.cardName}] 카드를 공개했습니다.");
 
-                    // 추리 노트에 자동 체크 (추가)
+                    // 카드 공개 애니메이션 (추가)
+                    if (CardRevealUI.Instance != null)
+                    {
+                        CardRevealUI.Instance.ShowCardReveal(player.playerName, matchingCard);
+                    }
+
                     if (DetectiveNoteData.Instance != null)
                     {
                         DetectiveNoteData.Instance.SetCardStatus(matchingCard.cardId, CardStatus.Shown);

@@ -80,18 +80,16 @@ namespace ClueGame.Managers
         // 주사위 굴리기
         public void RollDice()
         {
-            if (currentPhase != GamePhase.RollingDice)
-            {
-                Debug.LogWarning("주사위를 굴릴 수 있는 페이즈가 아닙니다.");
-                return;
-            }
+            if (currentPhase != GamePhase.RollingDice) return;
 
-            int diceResult = DiceManager.Instance.RollDice();
-            remainingMoves = diceResult;
+            int result = DiceManager.Instance.RollDice();
+            remainingMoves = result;
 
-            // 이동 가능한 위치 계산
+            Debug.Log($"주사위 결과: {result}");
+
+            // 이동 가능한 타일 하이라이트
             PlayerData currentPlayer = GetCurrentPlayer();
-            MovementManager.Instance.CalculateAvailableMoves(currentPlayer.currentPosition, diceResult);
+            MovementManager.Instance.CalculateReachableTiles(currentPlayer.currentPosition, remainingMoves);
 
             ChangePhase(GamePhase.Moving);
         }

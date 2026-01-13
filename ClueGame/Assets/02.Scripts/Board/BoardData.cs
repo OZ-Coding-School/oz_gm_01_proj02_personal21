@@ -3,23 +3,20 @@ using ClueGame.Data;
 
 namespace ClueGame.Board
 {
-    // 타일 타입
     public enum TileType
     {
-        Empty,      // 빈 공간
-        Hallway,    // 복도 (이동 가능)
-        Room,       // 방
-        StartPoint  // 시작 지점
+        Empty,
+        Hallway,
+        Room,
+        StartPoint
     }
 
-    // 타일 클래스
-    [System.Serializable]
     public class BoardTile
     {
         public TileType tileType;
         public Vector2Int position;
-        public RoomCard? roomType; // 방일 경우 어떤 방인지
-        public bool isOccupied;    // 플레이어가 있는지
+        public RoomCard? roomType;
+        public bool isOccupied;
 
         public BoardTile(TileType type, Vector2Int pos, RoomCard? room = null)
         {
@@ -31,8 +28,16 @@ namespace ClueGame.Board
 
         public bool IsWalkable()
         {
-            return (tileType == TileType.Hallway || tileType == TileType.Room || tileType == TileType.StartPoint)
-                   && !isOccupied;
+            return (tileType == TileType.Hallway ||
+                    tileType == TileType.Room ||
+                    tileType == TileType.StartPoint) &&
+                   !isOccupied;
+        }
+
+        // SetOccupied 메서드 추가
+        public void SetOccupied(bool occupied)
+        {
+            isOccupied = occupied;
         }
     }
 }
