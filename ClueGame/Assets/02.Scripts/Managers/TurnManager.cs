@@ -1,6 +1,7 @@
-using UnityEngine;
+using ClueGame.Data;
 using ClueGame.Player;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace ClueGame.Managers
 {
@@ -45,7 +46,84 @@ namespace ClueGame.Managers
                 Destroy(gameObject);
             }
         }
+        private void Update()
+        {
+            if (currentPhase == GamePhase.Moving && remainingMoves > 0)
+            {
+                PlayerData currentPlayer = GetCurrentPlayer();
+                bool moved = false;
+                Vector2Int direction = Vector2Int.zero;
 
+                if (Input.GetKeyDown(KeyCode.UpArrow))
+                {
+                    direction = Vector2Int.up;
+                }
+                else if (Input.GetKeyDown(KeyCode.DownArrow))
+                {
+                    direction = Vector2Int.down;
+                }
+                else if (Input.GetKeyDown(KeyCode.LeftArrow))
+                {
+                    direction = Vector2Int.left;
+                }
+                else if (Input.GetKeyDown(KeyCode.RightArrow))
+                {
+                    direction = Vector2Int.right;
+                }
+
+                if (direction != Vector2Int.zero)
+                {
+                    Vector2Int targetPos = currentPlayer.currentPosition + direction;
+
+                    // 이동 전 상태 저장
+                    bool wasInRoom = currentPlayer.IsInRoom();
+                    RoomCard? currentRoom = wasInRoom ? currentPlayer.currentRoom : null;
+
+          
+                    // 이동 전 방 확인
+                    RoomCard? beforeRoom = BoardManager.Instance.GetRoomAtPosition(currentPlayer.currentPosition);
+
+                    moved = MovementManager.Instance.MovePlayer(currentPlayer, targetPos);
+
+                    if (moved)
+                    {
+                        // 이동 후 방 확인
+                        RoomCard? afterRoom = BoardManager.Instance.GetRoomAtPosition(currentPlayer.currentPosition);
+
+                        // 새로운 방에 들어갔는지 확인
+                        bool enteredNewRoom = false;
+
+                        if (afterRoom.HasValue)
+                        {
+                            // 이전에 방에 없었거나, 다른 방이면 → 새 방 입장
+                            if (!beforeRoom.HasValue || beforeRoom.Value != afterRoom.Value)
+                            {
+                                enteredNewRoom = true;
+                            }
+                        }
+
+                        if (enteredNewRoom)
+                        {
+                            // 새로운 방에 들어가면 즉시 이동 종료
+                            remainingMoves = 0;
+                            Debug.Log($"{afterRoom}에 들어갔습니다! 이동 종료");
+                            ChangePhase(GamePhase.InRoom);
+                        }
+                        else
+                        {
+                            // 같은 방 안이거나 복도 이동 → 카운트 감소
+                            remainingMoves--;
+                            Debug.Log($"남은 이동: {remainingMoves}");
+
+                            if (remainingMoves == 0)
+                            {
+                                ChangePhase(GamePhase.InRoom);
+                            }
+                        }
+                    }
+                }
+            }
+        }
         // 플레이어 리스트 설정
         public void SetPlayers(List<PlayerData> playerList)
         {

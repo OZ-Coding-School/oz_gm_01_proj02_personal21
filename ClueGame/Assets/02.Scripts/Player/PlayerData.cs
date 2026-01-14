@@ -48,11 +48,9 @@ namespace ClueGame.Player
         public List<Card> GetMatchingCards(Card character, Card weapon, Card room)
         {
             List<Card> matchingCards = new List<Card>();
-
             if (HasCard(character)) matchingCards.Add(character);
             if (HasCard(weapon)) matchingCards.Add(weapon);
             if (HasCard(room)) matchingCards.Add(room);
-
             return matchingCards;
         }
 
@@ -86,6 +84,13 @@ namespace ClueGame.Player
         public bool IsInRoom()
         {
             return currentRoom.HasValue;
+        }
+
+        // 플레이어 탈락 처리 (추가!)
+        public void EliminatePlayer()
+        {
+            isEliminated = true;
+            Debug.Log($"{playerName}이(가) 탈락했습니다!");
         }
     }
 }

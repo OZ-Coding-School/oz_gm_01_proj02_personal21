@@ -35,7 +35,6 @@ namespace ClueGame.Managers
             }
         }
 
-        // 이동 가능한 위치 계산 및 하이라이트
         public List<Vector2Int> CalculateReachableTiles(Vector2Int startPosition, int moves)
         {
             List<Vector2Int> reachableTiles = new List<Vector2Int>();
@@ -65,13 +64,13 @@ namespace ClueGame.Managers
                 }
             }
 
-            // 하이라이트 표시
+            // 하이라이트 표시 (현재 방 필터링)
             HighlightTiles(reachableTiles);
 
             return reachableTiles;
         }
 
-        // 타일 하이라이트
+        // 타일 하이라이트 (현재 방 제외)
         private void HighlightTiles(List<Vector2Int> tiles)
         {
             // 기존 하이라이트 제거
@@ -79,15 +78,32 @@ namespace ClueGame.Managers
 
             if (BoardVisualizer.Instance == null) return;
 
+            // 현재 플레이어와 방 확인
+            PlayerData currentPlayer = TurnManager.Instance.GetCurrentPlayer();
+            RoomCard? currentRoom = currentPlayer.IsInRoom() ? currentPlayer.currentRoom : null;
+
+            Debug.Log($"현재 방: {currentRoom}");
+
             foreach (var tile in tiles)
             {
-                // 방인지 확인
-                RoomCard? room = BoardManager.Instance.GetRoomAtPosition(tile);
-                Color highlightColor = room.HasValue ? roomHighlightColor : moveHighlightColor;
+                // 이 타일이 어느 방인지 확인
+                RoomCard? tileRoom = BoardManager.Instance.GetRoomAtPosition(tile);
+
+                // 현재 있는 방과 같은 방이면 스킵
+                if (currentRoom.HasValue && tileRoom.HasValue && currentRoom.Value == tileRoom.Value)
+                {
+                    Debug.Log($"타일 ({tile.x}, {tile.y}) - 같은 방({tileRoom}) 제외");
+                    continue;
+                }
+
+                // 방인지 복도인지에 따라 색상 결정
+                Color highlightColor = tileRoom.HasValue ? roomHighlightColor : moveHighlightColor;
 
                 BoardVisualizer.Instance.HighlightTile(tile, highlightColor);
                 currentHighlightedTiles.Add(tile);
             }
+
+            Debug.Log($"하이라이트된 타일 수: {currentHighlightedTiles.Count}");
         }
 
         // 하이라이트 제거
@@ -135,11 +151,12 @@ namespace ClueGame.Managers
             };
         }
 
-        // 기존 메서드들...
+
         public bool MovePlayer(PlayerData player, Vector2Int targetPosition)
         {
             if (!BoardManager.Instance.CanMoveTo(targetPosition))
             {
+                Debug.LogWarning($"이동 불가: {targetPosition}");
                 return false;
             }
 
@@ -149,7 +166,13 @@ namespace ClueGame.Managers
                 oldTile.SetOccupied(false);
             }
 
+            // 이전 상태 저장
+            bool wasInRoom = player.IsInRoom();
+            RoomCard? oldRoom = wasInRoom ? player.currentRoom : null;
+
+            // 일단 목표 위치로 이동
             player.currentPosition = targetPosition;
+            Debug.Log($"{player.playerName} 이동: {targetPosition}");
 
             BoardTile newTile = BoardManager.Instance.GetTile(targetPosition);
             if (newTile != null)
@@ -157,32 +180,36 @@ namespace ClueGame.Managers
                 newTile.SetOccupied(true);
             }
 
-            // 방 확인
-            RoomCard? room = BoardManager.Instance.GetRoomAtPosition(targetPosition);
-            if (room.HasValue)
-            {
-                Vector2Int roomCenter = BoardManager.Instance.GetRoomCenter(room.Value);
-                player.currentPosition = roomCenter;
-                player.EnterRoom(room.Value);
+            // 현재 위치가 방인지 확인
+            RoomCard? newRoom = BoardManager.Instance.GetRoomAtPosition(targetPosition);
 
-                OnPlayerEnteredRoom?.Invoke(player, room.Value);
+            if (newRoom.HasValue)
+            {
+                // 다른 방에 들어갔을 때만 중앙으로
+                if (!wasInRoom || oldRoom != newRoom)
+                {
+                    Debug.Log($"{player.playerName}이(가) {newRoom}에 입장!");
+
+                    // *** 여기서 중앙으로 이동하지 말고, 그냥 방 입장만 표시 ***
+                    player.EnterRoom(newRoom.Value);
+                    OnPlayerEnteredRoom?.Invoke(player, newRoom.Value);
+                }
             }
             else
             {
-                if (player.IsInRoom())
+                // 복도로 나옴
+                if (wasInRoom)
                 {
                     player.ExitRoom();
+                    Debug.Log($"{player.playerName}이(가) 방에서 나왔습니다.");
                 }
             }
 
             OnPlayerMoved?.Invoke(player, targetPosition);
-
-            // 이동 후 하이라이트 제거
             ClearHighlights();
 
             return true;
         }
-
         public bool MovePlayerOneStep(PlayerData player, Vector2Int direction)
         {
             Vector2Int newPosition = player.currentPosition + direction;
