@@ -141,17 +141,28 @@ namespace ClueGame.Managers
         // 턴 시작
         public void StartTurn()
         {
-            PlayerData currentPlayer = GetCurrentPlayer();
+            if (currentPlayerIndex >= players.Count)
+            {
+                currentPlayerIndex = 0;
+            }
 
+            PlayerData currentPlayer = players[currentPlayerIndex];
+
+            // 탈락한 플레이어 스킵
             if (currentPlayer.isEliminated)
             {
-                NextTurn();
+                currentPlayerIndex++;
+                StartTurn();
                 return;
             }
 
             Debug.Log($"=== {currentPlayer.playerName}의 턴 시작 ===");
-            OnTurnStart?.Invoke(currentPlayer);
 
+            // 턴 행동 초기화 (추가!)
+            currentPlayer.ResetTurnActions();
+
+            ChangePhase(GamePhase.TurnStart);
+            OnTurnStart?.Invoke(currentPlayer);
             ChangePhase(GamePhase.RollingDice);
         }
 

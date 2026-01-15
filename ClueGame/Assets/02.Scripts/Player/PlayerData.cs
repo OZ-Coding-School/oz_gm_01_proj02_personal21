@@ -13,9 +13,13 @@ namespace ClueGame.Player
         public bool isEliminated = false;
         public bool isAI = false;
 
-        // 보드 위치 추가
+        // 보드 위치
         public Vector2Int currentPosition;
-        public RoomCard? currentRoom; // null이면 복도, 값이 있으면 방 안
+        public RoomCard? currentRoom;
+
+        // 턴당 제한 (추가!)
+        public bool hasSuggestedThisTurn = false;
+        public bool hasAccusedThisTurn = false;
 
         public PlayerData(string name, CharacterCard character, bool ai = false)
         {
@@ -44,7 +48,6 @@ namespace ClueGame.Player
             return null;
         }
 
-        // 여러 매칭 카드 반환 (플레이어 선택용)
         public List<Card> GetMatchingCards(Card character, Card weapon, Card room)
         {
             List<Card> matchingCards = new List<Card>();
@@ -63,14 +66,12 @@ namespace ClueGame.Player
             }
         }
 
-        // 방에 입장
         public void EnterRoom(RoomCard room)
         {
             currentRoom = room;
             Debug.Log($"{playerName}이(가) {room}에 입장했습니다.");
         }
 
-        // 방에서 나가기
         public void ExitRoom()
         {
             if (currentRoom.HasValue)
@@ -80,17 +81,22 @@ namespace ClueGame.Player
             }
         }
 
-        // 방 안에 있는지 확인
         public bool IsInRoom()
         {
             return currentRoom.HasValue;
         }
 
-        // 플레이어 탈락 처리 (추가!)
         public void EliminatePlayer()
         {
             isEliminated = true;
             Debug.Log($"{playerName}이(가) 탈락했습니다!");
+        }
+
+        // 턴 시작 시 초기화 (추가!)
+        public void ResetTurnActions()
+        {
+            hasSuggestedThisTurn = false;
+            hasAccusedThisTurn = false;
         }
     }
 }

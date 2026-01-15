@@ -1,6 +1,7 @@
+using ClueGame.Managers;
+using ClueGame.Player;
 using UnityEngine;
 using UnityEngine.UI;
-using ClueGame.Managers;
 
 namespace ClueGame.UI
 {
@@ -51,16 +52,44 @@ namespace ClueGame.UI
 
         private void OnSuggestClicked()
         {
-            Debug.Log("제안하기 버튼 클릭 - 제안 UI 열기 예정");
-            // TODO: 제안 UI 열기 (내일 구현)
+            PlayerData currentPlayer = TurnManager.Instance.GetCurrentPlayer();
+
+            // 이미 제안했는지 확인 (추가!)
+            if (currentPlayer.hasSuggestedThisTurn)
+            {
+                Debug.LogWarning("이미 이번 턴에 제안했습니다!");
+                return;
+            }
+
+            if (currentPlayer.IsInRoom())
+            {
+                if (SuggestionUI.Instance != null)
+                {
+                    SuggestionUI.Instance.ShowSuggestionPanel();
+                }
+            }
+            else
+            {
+                Debug.LogWarning("방 안에 있지 않아 제안할 수 없습니다.");
+            }
         }
 
         private void OnAccuseClicked()
         {
-            Debug.Log("고발하기 버튼 클릭 - 고발 UI 열기 예정");
-            // TODO: 고발 UI 열기 (내일 구현)
-        }
+            PlayerData currentPlayer = TurnManager.Instance.GetCurrentPlayer();
 
+            // 이미 고발했는지 확인 (추가!)
+            if (currentPlayer.hasAccusedThisTurn)
+            {
+                Debug.LogWarning("이미 이번 턴에 고발했습니다!");
+                return;
+            }
+
+            if (SuggestionUI.Instance != null)
+            {
+                SuggestionUI.Instance.ShowAccusationPanel();
+            }
+        }
         private void OnNextTurnClicked()
         {
             TurnManager.Instance.EndTurn();

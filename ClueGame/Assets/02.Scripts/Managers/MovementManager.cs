@@ -92,7 +92,7 @@ namespace ClueGame.Managers
                 // 현재 있는 방과 같은 방이면 스킵
                 if (currentRoom.HasValue && tileRoom.HasValue && currentRoom.Value == tileRoom.Value)
                 {
-                    Debug.Log($"타일 ({tile.x}, {tile.y}) - 같은 방({tileRoom}) 제외");
+         
                     continue;
                 }
 

@@ -58,8 +58,14 @@ namespace ClueGame.AI
 
         private IEnumerator AITurn(PlayerData player)
         {
+            // 플레이어가 모두 탈락했는지 확인
+            bool allHumanPlayersEliminated = CheckAllHumanPlayersEliminated();
+
+            // 관전 모드: AI 딜레이 단축
+            float delay = allHumanPlayersEliminated ? 0.1f : aiThinkDelay;
+
             Debug.Log($"AI {player.playerName}: AITurn 코루틴 시작");
-            yield return new WaitForSeconds(aiThinkDelay);
+            yield return new WaitForSeconds(delay);
 
             // 1. 주사위 굴리기
             GamePhase currentPhase = TurnManager.Instance.GetCurrentPhase();
@@ -69,11 +75,7 @@ namespace ClueGame.AI
             {
                 Debug.Log($"AI {player.playerName}: 주사위 굴리기 시도");
                 TurnManager.Instance.RollDice();
-                yield return new WaitForSeconds(aiThinkDelay);
-            }
-            else
-            {
-                Debug.LogWarning($"AI {player.playerName}: RollingDice 페이즈가 아님! 현재: {currentPhase}");
+                yield return new WaitForSeconds(delay);
             }
 
             // 2. 이동
@@ -84,9 +86,8 @@ namespace ClueGame.AI
                 Debug.Log($"AI {player.playerName}: {moves}칸 이동");
 
                 MovementManager.Instance.MovePlayerRandomly(player, moves);
-                yield return new WaitForSeconds(aiThinkDelay);
+                yield return new WaitForSeconds(delay);
 
-                // 방에 들어갔으면 이동 종료
                 if (player.IsInRoom())
                 {
                     Debug.Log($"AI {player.playerName}: 방 입장, 이동 종료");
@@ -94,33 +95,48 @@ namespace ClueGame.AI
                 }
             }
 
-            yield return new WaitForSeconds(aiThinkDelay);
+            yield return new WaitForSeconds(delay);
 
             // 3. 방에 있으면 제안하기
             if (player.IsInRoom())
             {
                 Debug.Log($"AI {player.playerName}: 제안 시작");
                 MakeSuggestion(player);
-                yield return new WaitForSeconds(aiThinkDelay);
+                yield return new WaitForSeconds(delay);
             }
             else
             {
                 // 4. 방 밖이면 고발 여부 결정 (낮은 확률)
-                if (Random.Range(0, 100) < 3) // 3% 확률 
+                if (Random.Range(0, 100) < 3)
                 {
                     Debug.Log($"AI {player.playerName}: 고발 시도");
                     MakeAccusation(player);
-                    yield return new WaitForSeconds(aiThinkDelay);
-                    yield break; // 고발 후 턴 종료
+                    yield return new WaitForSeconds(delay);
+                    yield break;
                 }
             }
 
             // 5. 턴 종료
-            yield return new WaitForSeconds(aiThinkDelay);
+            yield return new WaitForSeconds(delay);
             Debug.Log($"AI {player.playerName}: 턴 종료");
             TurnManager.Instance.EndTurn();
         }
 
+        // 모든 사람 플레이어가 탈락했는지 확인 (추가!)
+        private bool CheckAllHumanPlayersEliminated()
+        {
+            List<PlayerData> players = GameManager.Instance.GetPlayers();
+
+            foreach (var player in players)
+            {
+                if (!player.isAI && !player.isEliminated)
+                {
+                    return false; // 사람 플레이어가 남아있음
+                }
+            }
+
+            return true; // 모든 사람 플레이어가 탈락
+        }
         private void MakeSuggestion(PlayerData player)
         {
             if (!player.currentRoom.HasValue)

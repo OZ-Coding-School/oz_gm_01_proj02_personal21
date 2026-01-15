@@ -92,6 +92,25 @@ namespace ClueGame.Managers
                    room.cardId == solutionRoom.cardId;
         }
 
+        // 정답 카드 가져오기 (추가!)
+        public Card GetAnswerCard(CardType type)
+        {
+            switch (type)
+            {
+                case CardType.Character:
+                    return solutionCharacter;
+
+                case CardType.Weapon:
+                    return solutionWeapon;
+
+                case CardType.Room:
+                    return solutionRoom;
+
+                default:
+                    return null;
+            }
+        }
+
         // 플레이어들에게 나눠줄 카드 리스트 반환 (정답 제외)
         public List<Card> GetCardsForDistribution()
         {
