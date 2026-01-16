@@ -32,7 +32,7 @@ namespace ClueGame.AI
             if (TurnManager.Instance != null)
             {
                 TurnManager.Instance.OnTurnStart += OnTurnStart;
-                Debug.Log("SimpleAI: OnTurnStart 이벤트 구독 완료");
+
             }
         }
 
@@ -46,12 +46,12 @@ namespace ClueGame.AI
 
         private void OnTurnStart(PlayerData player)
         {
-            Debug.Log($"OnTurnStart 호출: {player.playerName}, isAI: {player.isAI}");
+ 
 
             // AI 플레이어의 턴이면 자동 플레이
             if (player.isAI && !player.isEliminated)
             {
-                Debug.Log($"AI {player.playerName} 턴 시작!");
+
                 StartCoroutine(AITurn(player));
             }
         }
@@ -64,16 +64,16 @@ namespace ClueGame.AI
             // 관전 모드: AI 딜레이 단축
             float delay = allHumanPlayersEliminated ? 0.1f : aiThinkDelay;
 
-            Debug.Log($"AI {player.playerName}: AITurn 코루틴 시작");
+
             yield return new WaitForSeconds(delay);
 
             // 1. 주사위 굴리기
             GamePhase currentPhase = TurnManager.Instance.GetCurrentPhase();
-            Debug.Log($"AI {player.playerName}: 현재 페이즈 = {currentPhase}");
+
 
             if (currentPhase == GamePhase.RollingDice)
             {
-                Debug.Log($"AI {player.playerName}: 주사위 굴리기 시도");
+       
                 TurnManager.Instance.RollDice();
                 yield return new WaitForSeconds(delay);
             }
@@ -83,14 +83,14 @@ namespace ClueGame.AI
                    TurnManager.Instance.RemainingMoves > 0)
             {
                 int moves = TurnManager.Instance.RemainingMoves;
-                Debug.Log($"AI {player.playerName}: {moves}칸 이동");
+    
 
                 MovementManager.Instance.MovePlayerRandomly(player, moves);
                 yield return new WaitForSeconds(delay);
 
                 if (player.IsInRoom())
                 {
-                    Debug.Log($"AI {player.playerName}: 방 입장, 이동 종료");
+             
                     break;
                 }
             }
@@ -100,7 +100,7 @@ namespace ClueGame.AI
             // 3. 방에 있으면 제안하기
             if (player.IsInRoom())
             {
-                Debug.Log($"AI {player.playerName}: 제안 시작");
+          
                 MakeSuggestion(player);
                 yield return new WaitForSeconds(delay);
             }
@@ -109,7 +109,7 @@ namespace ClueGame.AI
                 // 4. 방 밖이면 고발 여부 결정 (낮은 확률)
                 if (Random.Range(0, 100) < 3)
                 {
-                    Debug.Log($"AI {player.playerName}: 고발 시도");
+          
                     MakeAccusation(player);
                     yield return new WaitForSeconds(delay);
                     yield break;
@@ -118,11 +118,11 @@ namespace ClueGame.AI
 
             // 5. 턴 종료
             yield return new WaitForSeconds(delay);
-            Debug.Log($"AI {player.playerName}: 턴 종료");
+    
             TurnManager.Instance.EndTurn();
         }
 
-        // 모든 사람 플레이어가 탈락했는지 확인 (추가!)
+        // 모든 사람 플레이어가 탈락했는지 확인 
         private bool CheckAllHumanPlayersEliminated()
         {
             List<PlayerData> players = GameManager.Instance.GetPlayers();
@@ -141,7 +141,7 @@ namespace ClueGame.AI
         {
             if (!player.currentRoom.HasValue)
             {
-                Debug.LogWarning("AI: 방에 없어서 제안 불가");
+
                 return;
             }
 
@@ -161,12 +161,12 @@ namespace ClueGame.AI
 
             if (room != null)
             {
-                Debug.Log($"AI 제안: {character.cardName} + {weapon.cardName} + {room.cardName}");
+     
                 SuggestionManager.Instance.MakeSuggestion(character, weapon, room);
             }
             else
             {
-                Debug.LogWarning($"AI: 방 카드를 찾을 수 없음 - {player.currentRoom}");
+               
             }
         }
 
@@ -184,13 +184,13 @@ namespace ClueGame.AI
             var roomCards = allCards.FindAll(c => c.cardType == CardType.Room);
             Card room = roomCards[Random.Range(0, roomCards.Count)];
 
-            Debug.Log($"AI 고발: {character.cardName} + {weapon.cardName} + {room.cardName}");
+            //Debug.Log($"AI 고발: {character.cardName} + {weapon.cardName} + {room.cardName}");
             bool result = AccusationManager.Instance.MakeAccusation(character, weapon, room);
 
             if (!result)
             {
                 player.EliminatePlayer();
-                Debug.Log($"AI {player.playerName} 고발 실패! 탈락!");
+       
             }
         }
     }

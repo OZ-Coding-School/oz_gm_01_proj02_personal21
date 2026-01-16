@@ -17,7 +17,7 @@ namespace ClueGame.Player
         public Vector2Int currentPosition;
         public RoomCard? currentRoom;
 
-        // 턴당 제한 (추가!)
+        // 턴당 제한 
         public bool hasSuggestedThisTurn = false;
         public bool hasAccusedThisTurn = false;
 
@@ -59,24 +59,24 @@ namespace ClueGame.Player
 
         public void PrintHand()
         {
-            Debug.Log($"{playerName}의 카드:");
+   
             foreach (var card in hand)
             {
-                Debug.Log($"  - {card}");
+        
             }
         }
 
         public void EnterRoom(RoomCard room)
         {
             currentRoom = room;
-            Debug.Log($"{playerName}이(가) {room}에 입장했습니다.");
+        
         }
 
         public void ExitRoom()
         {
             if (currentRoom.HasValue)
             {
-                Debug.Log($"{playerName}이(가) {currentRoom}에서 나갔습니다.");
+           
                 currentRoom = null;
             }
         }
@@ -89,10 +89,10 @@ namespace ClueGame.Player
         public void EliminatePlayer()
         {
             isEliminated = true;
-            Debug.Log($"{playerName}이(가) 탈락했습니다!");
+    
         }
 
-        // 턴 시작 시 초기화 (추가!)
+        // 턴 시작 시 초기화 
         public void ResetTurnActions()
         {
             hasSuggestedThisTurn = false;

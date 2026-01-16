@@ -33,12 +33,10 @@ namespace ClueGame.Managers
 
             if (currentPlayer.hasAccusedThisTurn)
             {
-                Debug.LogWarning("이미 이번 턴에 고발했습니다!");
+          
                 return false;
             }
 
-            Debug.Log($"=== {currentPlayer.playerName}의 고발 ===");
-            Debug.Log($"{character.cardName} + {weapon.cardName} + {room.cardName}");
 
             Card answerCharacter = CardManager.Instance.GetAnswerCard(CardType.Character);
             Card answerWeapon = CardManager.Instance.GetAnswerCard(CardType.Weapon);
@@ -103,7 +101,7 @@ namespace ClueGame.Managers
             // 사람 플레이어가 탈락했으면 즉시 게임 종료
             if (humanPlayerEliminated)
             {
-                Debug.Log("플레이어가 탈락했습니다! 게임 종료!");
+        
 
                 Card answerCharacter = CardManager.Instance.GetAnswerCard(CardType.Character);
                 Card answerWeapon = CardManager.Instance.GetAnswerCard(CardType.Weapon);
@@ -123,7 +121,7 @@ namespace ClueGame.Managers
             // 모든 플레이어가 탈락했으면 게임 종료
             if (!anyPlayerAlive)
             {
-                Debug.Log("모든 플레이어가 탈락했습니다! 게임 종료!");
+              
 
                 Card answerCharacter = CardManager.Instance.GetAnswerCard(CardType.Character);
                 Card answerWeapon = CardManager.Instance.GetAnswerCard(CardType.Weapon);

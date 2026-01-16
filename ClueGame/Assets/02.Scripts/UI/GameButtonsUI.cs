@@ -54,10 +54,13 @@ namespace ClueGame.UI
         {
             PlayerData currentPlayer = TurnManager.Instance.GetCurrentPlayer();
 
-            // 이미 제안했는지 확인 (추가!)
+            // 이미 제안했는지 확인 
             if (currentPlayer.hasSuggestedThisTurn)
             {
-                Debug.LogWarning("이미 이번 턴에 제안했습니다!");
+                if (NotificationUI.Instance != null)
+                {
+                    NotificationUI.Instance.ShowNotification("이미 이번 턴에 제안했습니다!");
+                }
                 return;
             }
 
@@ -70,7 +73,10 @@ namespace ClueGame.UI
             }
             else
             {
-                Debug.LogWarning("방 안에 있지 않아 제안할 수 없습니다.");
+                if (NotificationUI.Instance != null)
+                {
+                    NotificationUI.Instance.ShowNotification("복도에서는 제안할수 없습니다!");
+                }
             }
         }
 
@@ -78,10 +84,13 @@ namespace ClueGame.UI
         {
             PlayerData currentPlayer = TurnManager.Instance.GetCurrentPlayer();
 
-            // 이미 고발했는지 확인 (추가!)
+            // 이미 고발했는지 확인
             if (currentPlayer.hasAccusedThisTurn)
             {
-                Debug.LogWarning("이미 이번 턴에 고발했습니다!");
+                if (NotificationUI.Instance != null)
+                {
+                    NotificationUI.Instance.ShowNotification("이미 이번 턴에 고발했습니다!");
+                }
                 return;
             }
 

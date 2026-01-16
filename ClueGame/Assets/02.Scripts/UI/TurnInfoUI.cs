@@ -1,8 +1,9 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+using ClueGame.Data;
 using ClueGame.Managers;
 using ClueGame.Player;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace ClueGame.UI
 {
@@ -51,14 +52,13 @@ namespace ClueGame.UI
                     GamePhase.TurnStart => "턴 시작",
                     GamePhase.RollingDice => "주사위 굴리기",
                     GamePhase.Moving => "이동 중",
-                    GamePhase.InRoom => "방 안",
+                    GamePhase.InRoom => GetRoomPhaseText(), 
                     GamePhase.Suggesting => "제안 중",
                     GamePhase.Accusing => "고발 중",
                     GamePhase.TurnEnd => "턴 종료",
                     GamePhase.GameEnd => "게임 종료",
                     _ => phase.ToString()
                 };
-
                 phaseText.text = $"페이즈: {phaseKorean}";
             }
 
@@ -72,6 +72,42 @@ namespace ClueGame.UI
             {
                 remainingMovesText.text = "";
             }
+        }
+
+        // 방 이름 가져오기 
+        private string GetRoomPhaseText()
+        {
+            PlayerData currentPlayer = TurnManager.Instance.GetCurrentPlayer();
+
+            if (currentPlayer != null && currentPlayer.IsInRoom())
+            {
+                string roomName = GetRoomNameInKorean(currentPlayer.currentRoom.Value);
+                return $"방 안 ({roomName})";
+            }
+            else if (!currentPlayer.IsInRoom())
+            {
+                return $"복도";
+            }
+
+            return "방 안";
+        }
+
+        // 방 이름 한글
+        private string GetRoomNameInKorean(RoomCard room)
+        {
+            return room switch
+            {
+                RoomCard.부엌 => "부엌",
+                RoomCard.무도회장 => "무도회장",
+                RoomCard.온실 => "온실",
+                RoomCard.식당 => "식당",
+                RoomCard.당구장 => "당구장",
+                RoomCard.도서관 => "도서관",
+                RoomCard.라운지 => "라운지",
+                RoomCard.홀 => "홀",
+                RoomCard.서재 => "서재",
+                _ => room.ToString()
+            };
         }
     }
 }

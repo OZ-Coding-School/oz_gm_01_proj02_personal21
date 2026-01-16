@@ -8,16 +8,16 @@ namespace ClueGame.Managers
     {
         private void Start()
         {
-            Debug.Log("GameTestController 시작!");
-            Debug.Log("===== 조작키 =====");
-            Debug.Log("Space: 주사위 굴리기");
-            Debug.Log("방향키: 한 칸씩 이동");
-            Debug.Log("M: AI 자동 이동");
-            Debug.Log("P: 비밀 통로 사용"); // 추가
-            Debug.Log("S: 제안하기");
-            Debug.Log("A: 고발하기");
-            Debug.Log("N: 다음 턴");
-            Debug.Log("==================");
+            //Debug.Log("GameTestController 시작!");
+            //Debug.Log("===== 조작키 =====");
+            //Debug.Log("Space: 주사위 굴리기");
+            //Debug.Log("방향키: 한 칸씩 이동");
+            //Debug.Log("M: AI 자동 이동");
+            //Debug.Log("P: 비밀 통로 사용");
+            //Debug.Log("S: 제안하기");
+            //Debug.Log("A: 고발하기");
+            //Debug.Log("N: 다음 턴");
+            //Debug.Log("==================");
         }
 
         private void Update()
@@ -73,7 +73,7 @@ namespace ClueGame.Managers
                 }
             }
 
-            // ===== P: 비밀 통로 사용 (추가) =====
+            // ===== P: 비밀 통로 사용=====
             if (Input.GetKeyDown(KeyCode.P))
             {
                 PlayerData currentPlayer = TurnManager.Instance.GetCurrentPlayer();

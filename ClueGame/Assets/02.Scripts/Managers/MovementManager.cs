@@ -82,7 +82,7 @@ namespace ClueGame.Managers
             PlayerData currentPlayer = TurnManager.Instance.GetCurrentPlayer();
             RoomCard? currentRoom = currentPlayer.IsInRoom() ? currentPlayer.currentRoom : null;
 
-            Debug.Log($"현재 방: {currentRoom}");
+
 
             foreach (var tile in tiles)
             {
@@ -103,7 +103,7 @@ namespace ClueGame.Managers
                 currentHighlightedTiles.Add(tile);
             }
 
-            Debug.Log($"하이라이트된 타일 수: {currentHighlightedTiles.Count}");
+ 
         }
 
         // 하이라이트 제거
@@ -156,7 +156,7 @@ namespace ClueGame.Managers
         {
             if (!BoardManager.Instance.CanMoveTo(targetPosition))
             {
-                Debug.LogWarning($"이동 불가: {targetPosition}");
+     
                 return false;
             }
 
@@ -172,7 +172,7 @@ namespace ClueGame.Managers
 
             // 일단 목표 위치로 이동
             player.currentPosition = targetPosition;
-            Debug.Log($"{player.playerName} 이동: {targetPosition}");
+ 
 
             BoardTile newTile = BoardManager.Instance.GetTile(targetPosition);
             if (newTile != null)
@@ -188,7 +188,7 @@ namespace ClueGame.Managers
                 // 다른 방에 들어갔을 때만 중앙으로
                 if (!wasInRoom || oldRoom != newRoom)
                 {
-                    Debug.Log($"{player.playerName}이(가) {newRoom}에 입장!");
+                 
 
                     // *** 여기서 중앙으로 이동하지 말고, 그냥 방 입장만 표시 ***
                     player.EnterRoom(newRoom.Value);
@@ -201,7 +201,7 @@ namespace ClueGame.Managers
                 if (wasInRoom)
                 {
                     player.ExitRoom();
-                    Debug.Log($"{player.playerName}이(가) 방에서 나왔습니다.");
+              
                 }
             }
 
@@ -237,9 +237,10 @@ namespace ClueGame.Managers
 
         public bool UseSecretPassage(PlayerData player)
         {
+            // 방에서만 비밀통로 이용 가능
             if (!player.IsInRoom())
             {
-                Debug.LogWarning("방 안에 있지 않아 비밀 통로를 사용할 수 없습니다.");
+        
                 return false;
             }
 
@@ -248,7 +249,7 @@ namespace ClueGame.Managers
 
             if (!destination.HasValue)
             {
-                Debug.LogWarning($"{currentRoom}에는 비밀 통로가 없습니다.");
+
                 return false;
             }
 
@@ -257,7 +258,7 @@ namespace ClueGame.Managers
             player.currentPosition = destPosition;
             player.EnterRoom(destination.Value);
 
-            Debug.Log($"{player.playerName}이(가) 비밀 통로를 통해 {currentRoom}에서 {destination.Value}로 이동했습니다!");
+           
             OnPlayerEnteredRoom?.Invoke(player, destination.Value);
 
             return true;

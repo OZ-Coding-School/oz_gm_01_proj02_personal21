@@ -29,7 +29,7 @@ namespace ClueGame.UI
             }
         }
 
-        // 배경 스프라이트를 설정하는 메서드 추가
+        // 배경 스프라이트를 설정하는 메서드
         public void SetBackground(Sprite sectionSprite)
         {
             if (cardBackgroundImage != null && sectionSprite != null)

@@ -34,7 +34,7 @@ namespace ClueGame.Board
                    !isOccupied;
         }
 
-        // SetOccupied 메서드 추가
+        // SetOccupied 메서드
         public void SetOccupied(bool occupied)
         {
             isOccupied = occupied;

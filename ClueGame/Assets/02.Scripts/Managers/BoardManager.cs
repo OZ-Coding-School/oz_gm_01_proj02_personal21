@@ -15,7 +15,7 @@ namespace ClueGame.Managers
 
         private BoardTile[,] board;
 
-        // ===== 비밀 통로 추가 =====
+        // ===== 비밀 통로 =====
         private Dictionary<RoomCard, RoomCard> secretPassages = new Dictionary<RoomCard, RoomCard>
         {
             { RoomCard.서재, RoomCard.부엌 },
@@ -83,8 +83,6 @@ namespace ClueGame.Managers
             CreateRoom(RoomCard.식당, 17, 9, 7, 7);
             CreateRoom(RoomCard.부엌, 18, 18, 5, 5);
 
-            Debug.Log($"{boardWidth}x{boardHeight} 보드가 생성되었습니다.");
-            Debug.Log($"비밀 통로: 서재↔부엌, 온실↔라운지");
         }
 
         private void CreateRoom(RoomCard roomType, int startX, int startY, int width, int height)
@@ -169,7 +167,7 @@ namespace ClueGame.Managers
             return new Vector2Int(boardWidth, boardHeight);
         }
 
-        // ===== 비밀 통로 관련 메서드 추가 =====
+        // ===== 비밀 통로 관련 메서드 =====
 
         // 비밀 통로가 있는지 확인
         public bool HasSecretPassage(RoomCard fromRoom)

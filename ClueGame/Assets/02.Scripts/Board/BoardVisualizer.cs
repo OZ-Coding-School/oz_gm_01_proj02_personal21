@@ -56,10 +56,9 @@ namespace ClueGame.Board
                 }
             }
 
-            // 방 라벨 추가
+            // 방 라벨 
             CreateRoomLabels();
 
-            Debug.Log("보드 비주얼 생성 완료");
         }
 
         private void CreateTileVisual(int x, int y)
@@ -136,6 +135,8 @@ namespace ClueGame.Board
 
         private void CreateRoomLabels()
         {
+
+            return;
             // 각 방의 중심 위치에 라벨 생성
             var rooms = System.Enum.GetValues(typeof(RoomCard));
 

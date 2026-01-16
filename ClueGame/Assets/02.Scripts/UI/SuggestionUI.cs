@@ -77,7 +77,7 @@ namespace ClueGame.UI
 
             if (!currentPlayer.IsInRoom())
             {
-                Debug.LogWarning("방 안에 있지 않아 제안할 수 없습니다.");
+             
                 return;
             }
 
@@ -183,13 +183,13 @@ namespace ClueGame.UI
                 // 고발: 방도 선택
                 Card room = roomCards[roomDropdown.value];
 
-                Debug.Log($"고발: {character.cardName} + {weapon.cardName} + {room.cardName}");
+          
                 bool result = AccusationManager.Instance.MakeAccusation(character, weapon, room);
 
                 if (!result)
                 {
                     currentPlayer.EliminatePlayer();
-                    Debug.Log($"{currentPlayer.playerName} 고발 실패! 탈락!");
+       
                 }
             }
             else
@@ -200,7 +200,7 @@ namespace ClueGame.UI
                     Card room = roomCards.Find(c => c.cardName == currentPlayer.currentRoom.ToString());
                     if (room != null)
                     {
-                        Debug.Log($"제안: {character.cardName} + {weapon.cardName} + {room.cardName}");
+                     
                         SuggestionManager.Instance.MakeSuggestion(character, weapon, room);
                     }
                 }

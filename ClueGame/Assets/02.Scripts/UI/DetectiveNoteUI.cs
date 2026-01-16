@@ -12,7 +12,7 @@ namespace ClueGame.UI
         [SerializeField] private GameObject noteCardPrefab;
 
 
-        [Header("Section Backgrounds")] // 섹션별 배경 추가
+        [Header("Section Backgrounds")] // 섹션별 배경
         [SerializeField] private Sprite characterBackground;
         [SerializeField] private Sprite weaponBackground;
         [SerializeField] private Sprite roomBackground;
@@ -55,10 +55,10 @@ namespace ClueGame.UI
             CreateNoteCards(CardType.Room, roomContainer, roomBackground);
 
             isInitialized = true;
-            Debug.Log("추리 노트 UI 초기화 완료");
+        
         }
 
-        // Sprite 매개변수 추가
+        // Sprite 매개변수
         private void CreateNoteCards(CardType type, Transform container, Sprite sectionBg)
         {
             var notes = DetectiveNoteData.Instance.GetNotesByType(type);

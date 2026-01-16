@@ -32,7 +32,7 @@ namespace ClueGame.UI
                 CreateCardUI(card);
             }
 
-            Debug.Log($"{player.playerName}의 카드 {player.hand.Count}장 표시됨");
+
         }
 
         private void CreateCardUI(Card card)

@@ -55,7 +55,6 @@ namespace ClueGame.Managers
                 CreateToken(player);
             }
 
-            Debug.Log($"{players.Count}개의 플레이어 토큰 생성 완료");
         }
 
         private void CreateToken(PlayerData player)
@@ -71,9 +70,9 @@ namespace ClueGame.Managers
                 // Prefab이 없으면 기본 원형 생성
                 tokenObj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 tokenObj.transform.SetParent(tokenContainer);
-                tokenObj.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f); // 0.5 → 0.8
+                tokenObj.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f); //  → 0.8
 
-                // SpriteRenderer 추가 (2D용)
+                // SpriteRenderer
                 Destroy(tokenObj.GetComponent<MeshRenderer>());
                 Destroy(tokenObj.GetComponent<MeshFilter>());
                 Destroy(tokenObj.GetComponent<SphereCollider>());

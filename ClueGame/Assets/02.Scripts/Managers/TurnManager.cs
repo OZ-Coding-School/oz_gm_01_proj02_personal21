@@ -26,7 +26,7 @@ namespace ClueGame.Managers
         private GamePhase currentPhase = GamePhase.GameStart;
         private int currentPlayerIndex = 0;
         private List<PlayerData> players;
-
+        private bool isEndingTurn = false;
         private int remainingMoves = 0;
         public int RemainingMoves => remainingMoves;
 
@@ -106,14 +106,14 @@ namespace ClueGame.Managers
                         {
                             // 새로운 방에 들어가면 즉시 이동 종료
                             remainingMoves = 0;
-                            Debug.Log($"{afterRoom}에 들어갔습니다! 이동 종료");
+            
                             ChangePhase(GamePhase.InRoom);
                         }
                         else
                         {
                             // 같은 방 안이거나 복도 이동 → 카운트 감소
                             remainingMoves--;
-                            Debug.Log($"남은 이동: {remainingMoves}");
+                      
 
                             if (remainingMoves == 0)
                             {
@@ -156,9 +156,9 @@ namespace ClueGame.Managers
                 return;
             }
 
-            Debug.Log($"=== {currentPlayer.playerName}의 턴 시작 ===");
+    
 
-            // 턴 행동 초기화 (추가!)
+            // 턴 행동 초기화 
             currentPlayer.ResetTurnActions();
 
             ChangePhase(GamePhase.TurnStart);
@@ -174,7 +174,7 @@ namespace ClueGame.Managers
             int result = DiceManager.Instance.RollDice();
             remainingMoves = result;
 
-            Debug.Log($"주사위 결과: {result}");
+
 
             // 이동 가능한 타일 하이라이트
             PlayerData currentPlayer = GetCurrentPlayer();
@@ -228,13 +228,26 @@ namespace ClueGame.Managers
         // 턴 종료
         public void EndTurn()
         {
-            PlayerData currentPlayer = GetCurrentPlayer();
-            Debug.Log($"=== {currentPlayer.playerName}의 턴 종료 ===");
+            if (isEndingTurn)
+            {
+          
+                return;
+            }
 
-            OnTurnEnd?.Invoke(currentPlayer);
-            ChangePhase(GamePhase.TurnEnd);
+            isEndingTurn = true;
+  
 
-            NextTurn();
+            if (currentPlayerIndex < players.Count - 1)
+            {
+                currentPlayerIndex++;
+            }
+            else
+            {
+                currentPlayerIndex = 0;
+            }
+
+            StartTurn();
+            isEndingTurn = false;
         }
 
         // 다음 플레이어로
@@ -250,7 +263,7 @@ namespace ClueGame.Managers
             if (CheckAllPlayersEliminated())
             {
                 ChangePhase(GamePhase.GameEnd);
-                Debug.Log("게임 종료! 모든 플레이어가 탈락했습니다.");
+          
                 return;
             }
 
@@ -262,7 +275,7 @@ namespace ClueGame.Managers
         private void ChangePhase(GamePhase newPhase)
         {
             currentPhase = newPhase;
-            Debug.Log($"Phase Changed: {newPhase}");
+    
             OnPhaseChanged?.Invoke(newPhase);
         }
 

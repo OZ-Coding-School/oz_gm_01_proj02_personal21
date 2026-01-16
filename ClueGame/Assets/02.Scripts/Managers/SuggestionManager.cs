@@ -31,15 +31,14 @@ namespace ClueGame.Managers
         {
             PlayerData currentPlayer = TurnManager.Instance.GetCurrentPlayer();
 
-            // 이미 제안했는지 확인 (추가!)
+            // 이미 제안했는지 확인 
             if (currentPlayer.hasSuggestedThisTurn)
             {
-                Debug.LogWarning("이미 이번 턴에 제안했습니다!");
+            
                 return null;
             }
 
-            Debug.Log($"=== {currentPlayer.playerName}의 제안 ===");
-            Debug.Log($"{character.cardName} + {weapon.cardName} + {room.cardName}");
+
 
             List<PlayerData> players = GameManager.Instance.GetPlayers();
             int currentIndex = players.IndexOf(currentPlayer);
@@ -55,7 +54,7 @@ namespace ClueGame.Managers
 
                 if (matchingCard != null)
                 {
-                    Debug.Log($"→ {player.playerName}이(가) [{matchingCard.cardName}] 카드를 공개했습니다.");
+                
 
                     // 카드 공개 애니메이션
                     if (CardRevealUI.Instance != null)
@@ -68,27 +67,27 @@ namespace ClueGame.Managers
                         DetectiveNoteData.Instance.SetCardStatus(matchingCard.cardId, CardStatus.Shown);
                     }
 
-                    // 제안 완료 표시 (추가!)
+                    // 제안 완료 표시 
                     currentPlayer.hasSuggestedThisTurn = true;
 
                     OnCardRevealed?.Invoke(player, matchingCard);
 
-                    // 자동 턴 넘김 (추가!)
-                    TurnManager.Instance.EndTurn();
+                    // 자동 턴 넘김
+                    //TurnManager.Instance.EndTurn();
 
                     return matchingCard;
                 }
             }
 
-            Debug.Log("→ 아무도 카드를 가지고 있지 않습니다!");
+      
 
-            // 제안 완료 표시 (추가!)
+            // 제안 완료 표시
             currentPlayer.hasSuggestedThisTurn = true;
 
             OnNoCardRevealed?.Invoke();
 
-            // 자동 턴 넘김 (추가!)
-            TurnManager.Instance.EndTurn();
+            // 자동 턴 넘김 
+            //TurnManager.Instance.EndTurn();
 
             return null;
         }

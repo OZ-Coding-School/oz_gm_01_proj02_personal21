@@ -50,7 +50,7 @@ namespace ClueGame.UI
         // 승리 화면
         public void ShowWin(string playerName, string character, string weapon, string room)
         {
-            // 게임 일시정지 (추가!)
+            // 게임 일시정지
             Time.timeScale = 0f;
 
             if (resultText != null)
@@ -74,13 +74,13 @@ namespace ClueGame.UI
                 endPanel.SetActive(true);
             }
 
-            Debug.Log("게임 종료: 승리!");
+
         }
 
         // 패배 화면
         public void ShowLose(string character, string weapon, string room)
         {
-            // 게임 일시정지 (추가!)
+            // 게임 일시정지
             Time.timeScale = 0f;
 
             if (resultText != null)
@@ -104,19 +104,19 @@ namespace ClueGame.UI
                 endPanel.SetActive(true);
             }
 
-            Debug.Log("게임 종료: 패배");
+
         }
 
         // 재시작
         private void OnRestartClicked()
         {
-            Debug.Log("게임 재시작!");
+  
 
             Time.timeScale = 1f;
 
             // 현재 씬 이름으로 로드
             string currentSceneName = SceneManager.GetActiveScene().name;
-            Debug.Log($"재시작할 씬: {currentSceneName}");
+
 
             SceneManager.LoadScene(currentSceneName);
         }
@@ -124,8 +124,8 @@ namespace ClueGame.UI
         // 종료
         private void OnQuitClicked()
         {
-            Debug.Log("게임 종료!");
-            Time.timeScale = 1f; // 게임 속도 복원 (추가!)
+           
+            Time.timeScale = 1f; // 게임 속도 복원
 
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;

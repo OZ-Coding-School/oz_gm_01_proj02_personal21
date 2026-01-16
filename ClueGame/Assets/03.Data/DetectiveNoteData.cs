@@ -69,7 +69,7 @@ namespace ClueGame.Data
                 }
             }
 
-            Debug.Log($"추리 노트 초기화: 총 {cardNotes.Count}개 카드");
+ 
         }
 
         public void SetCardStatus(int cardId, CardStatus status)

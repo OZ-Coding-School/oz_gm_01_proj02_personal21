@@ -33,7 +33,6 @@ namespace ClueGame.Managers
         public int RollDice()
         {
             lastRollValue = Random.Range(minValue, maxValue + 1);
-            Debug.Log($"주사위 결과: {lastRollValue}");
 
             OnDiceRolled?.Invoke(lastRollValue);
             return lastRollValue;
@@ -49,14 +48,14 @@ namespace ClueGame.Managers
             while (elapsed < duration)
             {
                 int tempValue = Random.Range(minValue, maxValue + 1);
-                Debug.Log($"Rolling... {tempValue}");
+        
                 elapsed += 0.1f;
                 yield return new WaitForSeconds(0.1f);
             }
 
             // 최종 결과
             lastRollValue = Random.Range(minValue, maxValue + 1);
-            Debug.Log($"주사위 최종 결과: {lastRollValue}");
+    
 
             OnDiceRolled?.Invoke(lastRollValue);
             callback?.Invoke(lastRollValue);
