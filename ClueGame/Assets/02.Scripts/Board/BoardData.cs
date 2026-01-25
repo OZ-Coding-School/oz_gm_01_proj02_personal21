@@ -8,7 +8,8 @@ namespace ClueGame.Board
         Empty,
         Hallway,
         Room,
-        StartPoint
+        StartPoint,
+        Wall 
     }
 
     public class BoardTile
@@ -34,7 +35,6 @@ namespace ClueGame.Board
                    !isOccupied;
         }
 
-        // SetOccupied ¸Þ¼­µå
         public void SetOccupied(bool occupied)
         {
             isOccupied = occupied;

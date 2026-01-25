@@ -175,12 +175,12 @@ MonoBehaviour:
   weaponBackground: {fileID: 21300000, guid: ee4c67015bfca7d44b54d088cfd0c7a7, type: 3}
   roomBackground: {fileID: 21300000, guid: bd14c853b4a5c79469d47e6b8a54a186, type: 3}
   characterSprites:
-  - {fileID: 21300000, guid: e812ddb94fc609b409b25ca9c50438e3, type: 3}
-  - {fileID: 21300000, guid: 649fe24aec9187340b8c7658c76293c6, type: 3}
   - {fileID: 21300000, guid: 77ff381fcbf27bd46846aabb79f7e323, type: 3}
-  - {fileID: 21300000, guid: fb29c1d7e6fa46049ba3e6e62702b440, type: 3}
-  - {fileID: 21300000, guid: a68b976696bc24a4aa34286fcdcc9cac, type: 3}
+  - {fileID: 21300000, guid: 649fe24aec9187340b8c7658c76293c6, type: 3}
   - {fileID: 21300000, guid: faf2444038f6b4b4483d729ff03309f5, type: 3}
+  - {fileID: 21300000, guid: e812ddb94fc609b409b25ca9c50438e3, type: 3}
+  - {fileID: 21300000, guid: a68b976696bc24a4aa34286fcdcc9cac, type: 3}
+  - {fileID: 21300000, guid: fb29c1d7e6fa46049ba3e6e62702b440, type: 3}
   weaponSprites:
   - {fileID: 21300000, guid: 0678c675852ab0541b9b6f3d3e81dd9c, type: 3}
   - {fileID: 21300000, guid: 9fe8fd01149bd0c418e2df1aed388d39, type: 3}
