@@ -1,0 +1,311 @@
+using ClueGame.Data;
+using ClueGame.Player;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace ClueGame.Managers
+{
+    public enum GamePhase
+    {
+        GameStart,      // 게임 시작
+        TurnStart,      // 턴 시작
+        RollingDice,    // 주사위 굴리기
+        Moving,         // 이동 중
+        InRoom,         // 방 안에서
+        Suggesting,     // 제안 중
+        Accusing,       // 고발 중
+        TurnEnd,        // 턴 종료
+        GameEnd         // 게임 종료
+    }
+
+    public class TurnManager : MonoBehaviour
+    {
+        public static TurnManager Instance { get; private set; }
+
+        [Header("Turn Settings")]
+        private GamePhase currentPhase = GamePhase.GameStart;
+        private int currentPlayerIndex = 0;
+        private List<PlayerData> players;
+        private bool isEndingTurn = false;
+        private int remainingMoves = 0;
+        public int RemainingMoves => remainingMoves;
+
+        // 이벤트
+        public System.Action<PlayerData> OnTurnStart;
+        public System.Action<PlayerData> OnTurnEnd;
+        public System.Action<GamePhase> OnPhaseChanged;
+
+        private void Awake()
+        {
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
+        }
+        private void Update()
+        {
+            if (currentPhase == GamePhase.Moving && remainingMoves > 0)
+            {
+                PlayerData currentPlayer = GetCurrentPlayer();
+                bool moved = false;
+                Vector2Int direction = Vector2Int.zero;
+
+                if (Input.GetKeyDown(KeyCode.UpArrow))
+                {
+                    direction = Vector2Int.up;
+                }
+                else if (Input.GetKeyDown(KeyCode.DownArrow))
+                {
+                    direction = Vector2Int.down;
+                }
+                else if (Input.GetKeyDown(KeyCode.LeftArrow))
+                {
+                    direction = Vector2Int.left;
+                }
+                else if (Input.GetKeyDown(KeyCode.RightArrow))
+                {
+                    direction = Vector2Int.right;
+                }
+
+                if (direction != Vector2Int.zero)
+                {
+                    Vector2Int targetPos = currentPlayer.currentPosition + direction;
+
+                    // 이동 전 상태 저장
+                    bool wasInRoom = currentPlayer.IsInRoom();
+                    RoomCard? currentRoom = wasInRoom ? currentPlayer.currentRoom : null;
+
+          
+                    // 이동 전 방 확인
+                    RoomCard? beforeRoom = BoardManager.Instance.GetRoomAtPosition(currentPlayer.currentPosition);
+
+                    moved = MovementManager.Instance.MovePlayer(currentPlayer, targetPos);
+
+                    if (moved)
+                    {
+                        // 이동 후 방 확인
+                        RoomCard? afterRoom = BoardManager.Instance.GetRoomAtPosition(currentPlayer.currentPosition);
+
+                        // 새로운 방에 들어갔는지 확인
+                        bool enteredNewRoom = false;
+
+                        if (afterRoom.HasValue)
+                        {
+                            // 이전에 방에 없었거나, 다른 방이면 → 새 방 입장
+                            if (!beforeRoom.HasValue || beforeRoom.Value != afterRoom.Value)
+                            {
+                                enteredNewRoom = true;
+                            }
+                        }
+
+                        if (enteredNewRoom)
+                        {
+                            // 새로운 방에 들어가면 즉시 이동 종료
+                            remainingMoves = 0;
+            
+                            ChangePhase(GamePhase.InRoom);
+                        }
+                        else
+                        {
+                            // 같은 방 안이거나 복도 이동 → 카운트 감소
+                            remainingMoves--;
+                      
+
+                            if (remainingMoves == 0)
+                            {
+                                ChangePhase(GamePhase.InRoom);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // 플레이어 리스트 설정
+        public void SetPlayers(List<PlayerData> playerList)
+        {
+            players = playerList;
+            currentPlayerIndex = 0;
+        }
+
+        // 게임 시작
+        public void StartGame()
+        {
+            ChangePhase(GamePhase.TurnStart);
+            StartTurn();
+        }
+
+        // 턴 시작
+        public void StartTurn()
+        {
+            if (currentPlayerIndex >= players.Count)
+            {
+                currentPlayerIndex = 0;
+            }
+
+            PlayerData currentPlayer = players[currentPlayerIndex];
+
+            // 탈락한 플레이어 스킵
+            if (currentPlayer.isEliminated)
+            {
+                currentPlayerIndex++;
+                StartTurn();
+                return;
+            }
+
+    
+
+            // 턴 행동 초기화 
+            currentPlayer.ResetTurnActions();
+
+            ChangePhase(GamePhase.TurnStart);
+            OnTurnStart?.Invoke(currentPlayer);
+            ChangePhase(GamePhase.RollingDice);
+        }
+
+        // 주사위 굴리기
+        public void RollDice()
+        {
+            if (currentPhase != GamePhase.RollingDice) return;
+
+            int result = DiceManager.Instance.RollDice();
+            remainingMoves = result;
+
+
+
+            // 이동 가능한 타일 하이라이트
+            PlayerData currentPlayer = GetCurrentPlayer();
+            MovementManager.Instance.CalculateReachableTiles(currentPlayer.currentPosition, remainingMoves);
+
+            ChangePhase(GamePhase.Moving);
+        }
+
+        // 이동 완료
+        public void OnMoveComplete()
+        {
+            remainingMoves--;
+
+            if (remainingMoves <= 0)
+            {
+                ChangePhase(GamePhase.InRoom);
+            }
+        }
+
+        // 제안하기
+        public void MakeSuggestion()
+        {
+            ChangePhase(GamePhase.Suggesting);
+        }
+
+        // 제안 완료
+        public void OnSuggestionComplete()
+        {
+            ChangePhase(GamePhase.InRoom);
+        }
+
+        // 고발하기
+        public void MakeAccusation()
+        {
+            ChangePhase(GamePhase.Accusing);
+        }
+
+        // 고발 완료
+        public void OnAccusationComplete(bool isCorrect)
+        {
+            if (isCorrect)
+            {
+                ChangePhase(GamePhase.GameEnd);
+            }
+            else
+            {
+                EndTurn();
+            }
+        }
+
+        // 턴 종료
+        public void EndTurn()
+        {
+            if (isEndingTurn)
+            {
+          
+                return;
+            }
+
+            isEndingTurn = true;
+  
+
+            if (currentPlayerIndex < players.Count - 1)
+            {
+                currentPlayerIndex++;
+            }
+            else
+            {
+                currentPlayerIndex = 0;
+            }
+
+            StartTurn();
+            isEndingTurn = false;
+        }
+
+        // 다음 플레이어로
+        private void NextTurn()
+        {
+            do
+            {
+                currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
+            }
+            while (players[currentPlayerIndex].isEliminated);
+
+            // 모든 플레이어가 탈락했는지 확인
+            if (CheckAllPlayersEliminated())
+            {
+                ChangePhase(GamePhase.GameEnd);
+          
+                return;
+            }
+
+            ChangePhase(GamePhase.TurnStart);
+            StartTurn();
+        }
+
+        // 페이즈 변경
+        private void ChangePhase(GamePhase newPhase)
+        {
+            currentPhase = newPhase;
+    
+            OnPhaseChanged?.Invoke(newPhase);
+        }
+
+        // 현재 플레이어 가져오기
+        public PlayerData GetCurrentPlayer()
+        {
+            return players[currentPlayerIndex];
+        }
+
+        // 현재 페이즈 가져오기
+        public GamePhase GetCurrentPhase()
+        {
+            return currentPhase;
+        }
+
+        // 모든 플레이어 탈락 확인
+        private bool CheckAllPlayersEliminated()
+        {
+            foreach (var player in players)
+            {
+                if (!player.isEliminated)
+                    return false;
+            }
+            return true;
+        }
+
+        // 턴 스킵 (방에 있지 않을 때)
+        public void SkipToNextTurn()
+        {
+            EndTurn();
+        }
+    }
+}
