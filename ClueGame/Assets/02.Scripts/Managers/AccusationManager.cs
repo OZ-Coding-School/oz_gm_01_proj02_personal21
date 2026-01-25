@@ -1,6 +1,8 @@
-using UnityEngine;
 using ClueGame.Data;
 using ClueGame.Player;
+using ClueGame.UI;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace ClueGame.Managers
 {
@@ -29,27 +31,112 @@ namespace ClueGame.Managers
         {
             PlayerData currentPlayer = TurnManager.Instance.GetCurrentPlayer();
 
-            Debug.Log($"=== {currentPlayer.playerName}의 고발 ===");
-            Debug.Log($"{character.cardName} + {weapon.cardName} + {room.cardName}");
+            if (currentPlayer.hasAccusedThisTurn)
+            {
+          
+                return false;
+            }
 
-            // 정답 확인
-            bool isCorrect = CardManager.Instance.CheckSolution(character, weapon, room);
+
+            Card answerCharacter = CardManager.Instance.GetAnswerCard(CardType.Character);
+            Card answerWeapon = CardManager.Instance.GetAnswerCard(CardType.Weapon);
+            Card answerRoom = CardManager.Instance.GetAnswerCard(CardType.Room);
+
+            bool isCorrect = (character.cardId == answerCharacter.cardId &&
+                             weapon.cardId == answerWeapon.cardId &&
+                             room.cardId == answerRoom.cardId);
+
+            currentPlayer.hasAccusedThisTurn = true;
 
             if (isCorrect)
             {
-                Debug.Log($"정답입니다! {currentPlayer.playerName}이(가) 승리했습니다!");
-                OnAccusationCorrect?.Invoke(currentPlayer);
+              
+
+                // 승리 UI 표시
+                if (GameEndUI.Instance != null)
+                {
+                    GameEndUI.Instance.ShowWin(
+                        currentPlayer.playerName,
+                        character.cardName,
+                        weapon.cardName,
+                        room.cardName
+                    );
+                }
             }
             else
             {
-                Debug.Log($" 틀렸습니다! {currentPlayer.playerName}이(가) 탈락합니다");
-                currentPlayer.isEliminated = true;
-                OnAccusationWrong?.Invoke(currentPlayer);
+           
+                currentPlayer.EliminatePlayer();
+
+                // 모든 플레이어 탈락 확인
+                CheckAllPlayersEliminated();
+
+                TurnManager.Instance.EndTurn();
             }
 
             return isCorrect;
         }
 
+        private void CheckAllPlayersEliminated()
+        {
+            List<PlayerData> players = GameManager.Instance.GetPlayers();
+
+            // 사람 플레이어가 탈락했는지 확인
+            bool humanPlayerEliminated = false;
+            bool anyPlayerAlive = false;
+
+            foreach (var player in players)
+            {
+                if (!player.isEliminated)
+                {
+                    anyPlayerAlive = true;
+                }
+
+                if (!player.isAI && player.isEliminated)
+                {
+                    humanPlayerEliminated = true;
+                }
+            }
+
+            // 사람 플레이어가 탈락했으면 즉시 게임 종료
+            if (humanPlayerEliminated)
+            {
+        
+
+                Card answerCharacter = CardManager.Instance.GetAnswerCard(CardType.Character);
+                Card answerWeapon = CardManager.Instance.GetAnswerCard(CardType.Weapon);
+                Card answerRoom = CardManager.Instance.GetAnswerCard(CardType.Room);
+
+                if (GameEndUI.Instance != null)
+                {
+                    GameEndUI.Instance.ShowLose(
+                        answerCharacter.cardName,
+                        answerWeapon.cardName,
+                        answerRoom.cardName
+                    );
+                }
+                return;
+            }
+
+            // 모든 플레이어가 탈락했으면 게임 종료
+            if (!anyPlayerAlive)
+            {
+              
+
+                Card answerCharacter = CardManager.Instance.GetAnswerCard(CardType.Character);
+                Card answerWeapon = CardManager.Instance.GetAnswerCard(CardType.Weapon);
+                Card answerRoom = CardManager.Instance.GetAnswerCard(CardType.Room);
+
+                if (GameEndUI.Instance != null)
+                {
+                    GameEndUI.Instance.ShowLose(
+                        answerCharacter.cardName,
+                        answerWeapon.cardName,
+                        answerRoom.cardName
+                    );
+                }
+            }
+        }
         // AI가 고발할지 결정 (간단한 로직)
         public bool ShouldAIMakeAccusation(PlayerData aiPlayer)
         {

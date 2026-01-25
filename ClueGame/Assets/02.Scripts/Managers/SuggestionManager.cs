@@ -1,7 +1,8 @@
-using UnityEngine;
 using ClueGame.Data;
 using ClueGame.Player;
+using ClueGame.UI;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace ClueGame.Managers
 {
@@ -29,10 +30,16 @@ namespace ClueGame.Managers
         public Card MakeSuggestion(Card character, Card weapon, Card room)
         {
             PlayerData currentPlayer = TurnManager.Instance.GetCurrentPlayer();
-            Debug.Log($"=== {currentPlayer.playerName}의 제안 ===");
-            Debug.Log($"{character.cardName} + {weapon.cardName} + {room.cardName}");
 
-            // 현재 플레이어의 다음 플레이어부터 순서대로 확인
+            // 이미 제안했는지 확인 
+            if (currentPlayer.hasSuggestedThisTurn)
+            {
+            
+                return null;
+            }
+
+
+
             List<PlayerData> players = GameManager.Instance.GetPlayers();
             int currentIndex = players.IndexOf(currentPlayer);
 
@@ -43,22 +50,47 @@ namespace ClueGame.Managers
 
                 if (player.isEliminated) continue;
 
-                // 해당 플레이어가 제안된 카드 중 하나라도 가지고 있는지 확인
                 Card matchingCard = player.GetMatchingCard(character, weapon, room);
 
                 if (matchingCard != null)
                 {
-                    Debug.Log($"→ {player.playerName}이(가) [{matchingCard.cardName}] 카드를 공개했습니다.");
+                
+
+                    // 카드 공개 애니메이션
+                    if (CardRevealUI.Instance != null)
+                    {
+                        CardRevealUI.Instance.ShowCardReveal(player.playerName, matchingCard);
+                    }
+
+                    if (DetectiveNoteData.Instance != null)
+                    {
+                        DetectiveNoteData.Instance.SetCardStatus(matchingCard.cardId, CardStatus.Shown);
+                    }
+
+                    // 제안 완료 표시 
+                    currentPlayer.hasSuggestedThisTurn = true;
+
                     OnCardRevealed?.Invoke(player, matchingCard);
+
+                    // 자동 턴 넘김
+                    //TurnManager.Instance.EndTurn();
+
                     return matchingCard;
                 }
             }
 
-            Debug.Log("→ 아무도 카드를 가지고 있지 않습니다!");
+      
+
+            // 제안 완료 표시
+            currentPlayer.hasSuggestedThisTurn = true;
+
             OnNoCardRevealed?.Invoke();
+
+            // 자동 턴 넘김 
+            //TurnManager.Instance.EndTurn();
+
             return null;
         }
-
         // AI가 제안할 카드 선택 (랜덤)
         public (Card character, Card weapon, Card room) GetRandomSuggestion(RoomCard currentRoom)
         {

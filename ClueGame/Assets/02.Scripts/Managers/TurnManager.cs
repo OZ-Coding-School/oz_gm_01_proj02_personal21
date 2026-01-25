@@ -1,6 +1,7 @@
-using UnityEngine;
+using ClueGame.Data;
 using ClueGame.Player;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace ClueGame.Managers
 {
@@ -25,7 +26,7 @@ namespace ClueGame.Managers
         private GamePhase currentPhase = GamePhase.GameStart;
         private int currentPlayerIndex = 0;
         private List<PlayerData> players;
-
+        private bool isEndingTurn = false;
         private int remainingMoves = 0;
         public int RemainingMoves => remainingMoves;
 
@@ -45,7 +46,84 @@ namespace ClueGame.Managers
                 Destroy(gameObject);
             }
         }
+        private void Update()
+        {
+            if (currentPhase == GamePhase.Moving && remainingMoves > 0)
+            {
+                PlayerData currentPlayer = GetCurrentPlayer();
+                bool moved = false;
+                Vector2Int direction = Vector2Int.zero;
 
+                if (Input.GetKeyDown(KeyCode.UpArrow))
+                {
+                    direction = Vector2Int.up;
+                }
+                else if (Input.GetKeyDown(KeyCode.DownArrow))
+                {
+                    direction = Vector2Int.down;
+                }
+                else if (Input.GetKeyDown(KeyCode.LeftArrow))
+                {
+                    direction = Vector2Int.left;
+                }
+                else if (Input.GetKeyDown(KeyCode.RightArrow))
+                {
+                    direction = Vector2Int.right;
+                }
+
+                if (direction != Vector2Int.zero)
+                {
+                    Vector2Int targetPos = currentPlayer.currentPosition + direction;
+
+                    // 이동 전 상태 저장
+                    bool wasInRoom = currentPlayer.IsInRoom();
+                    RoomCard? currentRoom = wasInRoom ? currentPlayer.currentRoom : null;
+
+          
+                    // 이동 전 방 확인
+                    RoomCard? beforeRoom = BoardManager.Instance.GetRoomAtPosition(currentPlayer.currentPosition);
+
+                    moved = MovementManager.Instance.MovePlayer(currentPlayer, targetPos);
+
+                    if (moved)
+                    {
+                        // 이동 후 방 확인
+                        RoomCard? afterRoom = BoardManager.Instance.GetRoomAtPosition(currentPlayer.currentPosition);
+
+                        // 새로운 방에 들어갔는지 확인
+                        bool enteredNewRoom = false;
+
+                        if (afterRoom.HasValue)
+                        {
+                            // 이전에 방에 없었거나, 다른 방이면 → 새 방 입장
+                            if (!beforeRoom.HasValue || beforeRoom.Value != afterRoom.Value)
+                            {
+                                enteredNewRoom = true;
+                            }
+                        }
+
+                        if (enteredNewRoom)
+                        {
+                            // 새로운 방에 들어가면 즉시 이동 종료
+                            remainingMoves = 0;
+            
+                            ChangePhase(GamePhase.InRoom);
+                        }
+                        else
+                        {
+                            // 같은 방 안이거나 복도 이동 → 카운트 감소
+                            remainingMoves--;
+                      
+
+                            if (remainingMoves == 0)
+                            {
+                                ChangePhase(GamePhase.InRoom);
+                            }
+                        }
+                    }
+                }
+            }
+        }
         // 플레이어 리스트 설정
         public void SetPlayers(List<PlayerData> playerList)
         {
@@ -63,31 +141,44 @@ namespace ClueGame.Managers
         // 턴 시작
         public void StartTurn()
         {
-            PlayerData currentPlayer = GetCurrentPlayer();
+            if (currentPlayerIndex >= players.Count)
+            {
+                currentPlayerIndex = 0;
+            }
 
+            PlayerData currentPlayer = players[currentPlayerIndex];
+
+            // 탈락한 플레이어 스킵
             if (currentPlayer.isEliminated)
             {
-                NextTurn();
+                currentPlayerIndex++;
+                StartTurn();
                 return;
             }
 
-            Debug.Log($"=== {currentPlayer.playerName}의 턴 시작 ===");
-            OnTurnStart?.Invoke(currentPlayer);
+    
 
+            // 턴 행동 초기화 
+            currentPlayer.ResetTurnActions();
+
+            ChangePhase(GamePhase.TurnStart);
+            OnTurnStart?.Invoke(currentPlayer);
             ChangePhase(GamePhase.RollingDice);
         }
 
         // 주사위 굴리기
         public void RollDice()
         {
-            if (currentPhase != GamePhase.RollingDice)
-            {
-                Debug.LogWarning("주사위를 굴릴 수 있는 페이즈가 아닙니다.");
-                return;
-            }
+            if (currentPhase != GamePhase.RollingDice) return;
 
-            int diceResult = DiceManager.Instance.RollDice();
-            remainingMoves = diceResult;
+            int result = DiceManager.Instance.RollDice();
+            remainingMoves = result;
+
+
+
+            // 이동 가능한 타일 하이라이트
+            PlayerData currentPlayer = GetCurrentPlayer();
+            MovementManager.Instance.CalculateReachableTiles(currentPlayer.currentPosition, remainingMoves);
 
             ChangePhase(GamePhase.Moving);
         }
@@ -137,13 +228,26 @@ namespace ClueGame.Managers
         // 턴 종료
         public void EndTurn()
         {
-            PlayerData currentPlayer = GetCurrentPlayer();
-            Debug.Log($"=== {currentPlayer.playerName}의 턴 종료 ===");
+            if (isEndingTurn)
+            {
+          
+                return;
+            }
 
-            OnTurnEnd?.Invoke(currentPlayer);
-            ChangePhase(GamePhase.TurnEnd);
+            isEndingTurn = true;
+  
 
-            NextTurn();
+            if (currentPlayerIndex < players.Count - 1)
+            {
+                currentPlayerIndex++;
+            }
+            else
+            {
+                currentPlayerIndex = 0;
+            }
+
+            StartTurn();
+            isEndingTurn = false;
         }
 
         // 다음 플레이어로
@@ -159,7 +263,7 @@ namespace ClueGame.Managers
             if (CheckAllPlayersEliminated())
             {
                 ChangePhase(GamePhase.GameEnd);
-                Debug.Log("게임 종료! 모든 플레이어가 탈락했습니다.");
+          
                 return;
             }
 
@@ -171,7 +275,7 @@ namespace ClueGame.Managers
         private void ChangePhase(GamePhase newPhase)
         {
             currentPhase = newPhase;
-            Debug.Log($"Phase Changed: {newPhase}");
+    
             OnPhaseChanged?.Invoke(newPhase);
         }
 

@@ -20,7 +20,7 @@ namespace ClueGame.Managers
             if (Instance == null)
             {
                 Instance = this;
-                DontDestroyOnLoad(gameObject);
+                //DontDestroyOnLoad(gameObject);
             }
             else
             {
@@ -33,6 +33,14 @@ namespace ClueGame.Managers
             Invoke(nameof(InitializeGame), 0.1f);
         }
 
+      
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+        }
         private void InitializeGame()
         {
             CreatePlayers();
@@ -41,7 +49,7 @@ namespace ClueGame.Managers
             // TurnManager에 플레이어 설정
             TurnManager.Instance.SetPlayers(players);
 
-            Debug.Log("게임 시작!");
+    
             PrintAllPlayersHands();
 
             // 게임 시작
@@ -54,12 +62,12 @@ namespace ClueGame.Managers
 
             var availableCharacters = new List<CharacterCard>
             {
-                CharacterCard.MissScarlet,
-                CharacterCard.ColonelMustard,
-                CharacterCard.MrsWhite,
-                CharacterCard.MrGreen,
-                CharacterCard.MrsPeacock,
-                CharacterCard.ProfessorPlum
+             CharacterCard.MissScarlet,
+             CharacterCard.ColonelMustard,
+             CharacterCard.MrsWhite,
+             CharacterCard.MrGreen,
+             CharacterCard.MrsPeacock,
+             CharacterCard.ProfessorPlum
             };
 
             for (int i = 0; i < numberOfPlayers; i++)
@@ -68,10 +76,14 @@ namespace ClueGame.Managers
                 string playerName = i == 0 ? "Player" : $"AI {i}";
                 bool isAI = i > 0;
 
-                players.Add(new PlayerData(playerName, character, isAI));
+                PlayerData player = new PlayerData(playerName, character, isAI);
+
+                // 시작 위치 설정
+                player.currentPosition = BoardManager.Instance.GetStartPosition(i);
+
+                players.Add(player);
             }
 
-            Debug.Log($"{numberOfPlayers}명의 플레이어가 생성되었습니다.");
         }
 
         private void DistributeCards()
@@ -88,7 +100,7 @@ namespace ClueGame.Managers
                 }
             }
 
-            Debug.Log("카드 분배 완료!");
+  
         }
 
         private void PrintAllPlayersHands()
@@ -103,7 +115,7 @@ namespace ClueGame.Managers
         public Card ProcessSuggestion(Card character, Card weapon, Card room)
         {
             PlayerData currentPlayer = TurnManager.Instance.GetCurrentPlayer();
-            Debug.Log($"{currentPlayer.playerName}의 제안: {character.cardName} + {weapon.cardName} + {room.cardName}");
+       
 
             // 현재 플레이어의 다음부터 순서대로 확인
             int currentIndex = players.IndexOf(currentPlayer);
@@ -118,12 +130,12 @@ namespace ClueGame.Managers
                 Card matchingCard = player.GetMatchingCard(character, weapon, room);
                 if (matchingCard != null)
                 {
-                    Debug.Log($"{player.playerName}이(가) {matchingCard.cardName} 카드를 공개했습니다.");
+          
                     return matchingCard;
                 }
             }
 
-            Debug.Log("아무도 카드를 가지고 있지 않습니다!");
+           
             return null;
         }
 
@@ -131,7 +143,7 @@ namespace ClueGame.Managers
         public bool ProcessAccusation(Card character, Card weapon, Card room)
         {
             PlayerData currentPlayer = TurnManager.Instance.GetCurrentPlayer();
-            Debug.Log($"{currentPlayer.playerName}의 고발: {character.cardName} + {weapon.cardName} + {room.cardName}");
+   
 
             bool isCorrect = CardManager.Instance.CheckSolution(character, weapon, room);
 

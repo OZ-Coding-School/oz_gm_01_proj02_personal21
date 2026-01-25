@@ -23,7 +23,8 @@ namespace ClueGame.Managers
             if (Instance == null)
             {
                 Instance = this;
-                DontDestroyOnLoad(gameObject);
+                // 재시작 오류로 주석 처리
+                //DontDestroyOnLoad(gameObject);
             }
             else
             {
@@ -36,6 +37,13 @@ namespace ClueGame.Managers
             InitializeCards();
         }
 
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+        }
         // 모든 카드 생성
         private void InitializeCards()
         {
@@ -60,7 +68,6 @@ namespace ClueGame.Managers
                 allCards.Add(new Card(CardType.Room, room.ToString(), cardId++));
             }
 
-            Debug.Log($"총 {allCards.Count}장의 카드가 생성되었습니다.");
 
             // 정답 설정
             SetupSolution();
@@ -81,7 +88,7 @@ namespace ClueGame.Managers
             var roomCards = allCards.Where(c => c.cardType == CardType.Room).ToList();
             solutionRoom = roomCards[Random.Range(0, roomCards.Count)];
 
-            Debug.Log($"정답: {solutionCharacter.cardName} + {solutionWeapon.cardName} + {solutionRoom.cardName}");
+ 
         }
 
         // 정답 확인
@@ -90,6 +97,25 @@ namespace ClueGame.Managers
             return character.cardId == solutionCharacter.cardId &&
                    weapon.cardId == solutionWeapon.cardId &&
                    room.cardId == solutionRoom.cardId;
+        }
+
+        // 정답 카드 가져오기
+        public Card GetAnswerCard(CardType type)
+        {
+            switch (type)
+            {
+                case CardType.Character:
+                    return solutionCharacter;
+
+                case CardType.Weapon:
+                    return solutionWeapon;
+
+                case CardType.Room:
+                    return solutionRoom;
+
+                default:
+                    return null;
+            }
         }
 
         // 플레이어들에게 나눠줄 카드 리스트 반환 (정답 제외)
